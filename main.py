@@ -2,8 +2,9 @@ from tkinter import*
 from tkinter import ttk
 from PIL import Image,ImageTk
 from student import Student
-
-
+import subprocess
+from train import Train
+from face_recognition import Face_Recognition
 
 
 class Face_Recorgnition_system:
@@ -63,7 +64,7 @@ class Face_Recorgnition_system:
         b1=Button(bg_img,image=self.photoimg5,command=self.student_detail)
         b1.place(x=50,y=180,width=230,height=230)
 
-        b1_1=Button(bg_img,text="STUDENT DETAIL",command=self.student_detail,cursor="spider",font=("times new roman",15,"bold"))
+        b1_1=Button(bg_img,command=self.student_detail,text="STUDENT DETAIL",cursor="spider",font=("times new roman",15,"bold"))
         b1_1.place(x=50,y=390,width=230,height=20)
 
         #detectface
@@ -72,10 +73,10 @@ class Face_Recorgnition_system:
         img6=img6.resize((180,180))
         self.photoimg6=ImageTk.PhotoImage(img6)
         #button declaration
-        b2=Button(bg_img,image=self.photoimg6)
+        b2=Button(bg_img,command=self.face_data,image=self.photoimg6)
         b2.place(x=300,y=180,width=230,height=230)
 
-        b2_1=Button(bg_img,text="FACE DETECTION",cursor="spider",font=("times new roman",15,"bold"))
+        b2_1=Button(bg_img,command=self.face_data,text="FACE DETECTION",cursor="spider",font=("times new roman",15,"bold"))
         b2_1.place(x=300,y=390,width=230,height=20)
 
 
@@ -109,23 +110,23 @@ class Face_Recorgnition_system:
         img9=img9.resize((180,180))
         self.photoimg9=ImageTk.PhotoImage(img9)
         #button declaration
-        b5=Button(bg_img,image=self.photoimg9)
+        b5=Button(bg_img,command=self.train_data,image=self.photoimg9)
         b5.place(x=800,y=180,width=230,height=230)
 
-        b5_1=Button(bg_img,text="TRAIN DATA",cursor="spider",font=("times new roman",15,"bold"))
+        b5_1=Button(bg_img,command=self.train_data,text="TRAIN DATA",cursor="spider",font=("times new roman",15,"bold"))
         b5_1.place(x=800,y=390,width=230,height=20)
 
 
-        #6photos button
-        img10=Image.open("images/photos.png")
-        img10=img10.resize((180,180))
-        self.photoimg10=ImageTk.PhotoImage(img10)
-        #button declaration
-        b6=Button(bg_img,image=self.photoimg10)
-        b6.place(x=1040,y=180,width=200,height=230)
+        # 6 photos button
+        img10 = Image.open("images/photos.png")
+        img10 = img10.resize((180, 180))
+        self.photoimg10 = ImageTk.PhotoImage(img10)
+        # button declaration
+        b6 = Button(bg_img, command=self.open_img, image=self.photoimg10)
+        b6.place(x=1040, y=180, width=200, height=230)
 
-        b6_1=Button(bg_img,text="PHOTOS",cursor="spider",font=("times new roman",15,"bold"))
-        b6_1.place(x=1040,y=390,width=200,height=20)
+        b6_1 = Button(bg_img, text="PHOTOS", command=self.open_img, cursor="spider", font=("times new roman", 15, "bold"))
+        b6_1.place(x=1040, y=390, width=200, height=20)
 
         #7 developer button
         img11=Image.open("images/dev.png")
@@ -149,15 +150,28 @@ class Face_Recorgnition_system:
         b8_1=Button(bg_img,text="EXIT",cursor="spider",font=("times new roman",15,"bold"))
         b8_1.place(x=1300,y=600,width=100,height=30)
 
+    
 
+    def open_img(self):
+       try:
+          subprocess.call(["open", "data"])
+       except FileNotFoundError:
+        print("Error: 'open' command not found. You might be using a non-macOS system.")
+  
         #================Function button=====================
         
     def student_detail(self):
         self.new_window=Toplevel(self.root)
         self.app=Student(self.new_window)
         
-
-
+    def train_data(self):
+        self.new_window=Toplevel(self.root)
+        self.app=Train(self.new_window)
+        
+    def face_data(self):
+        self.new_window=Toplevel(self.root)
+        self.app=Face_Recognition(self.new_window)
+        
 
 
 
