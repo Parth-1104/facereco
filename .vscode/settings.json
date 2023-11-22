@@ -14,5 +14,6 @@
             "username": "admin",
             "password": "@Parth427"
         }
-    ]
+    ],
+    "git.ignoreLimitWarning": true
 }

@@ -3,21 +3,22 @@ from tkinter import ttk
 from PIL import Image,ImageTk
 from tkinter import messagebox
 import mysql.connector
-from time import strftime
-from datetime import datetime
 import cv2
 import os
 import numpy as np
+from sys import path
+import time
 
 
 
 
 
-class Face_Recognition:
+class reco:
     def __init__(self,root):
         self.root=root
         self.root.geometry("1530x790+0+0")
         self.root.title("face Recorgnisation System")
+
 
         #first img
         img=Image.open("images/ben10.png")
@@ -33,125 +34,85 @@ class Face_Recognition:
         title_lbl.place(x=350,y=0,width=1530,height=120)
 
          #the things will go above the bgimage  area
-        title_lbl=Label(self.root,text="Face Recognisation",font=("times new roman",45),bg="white",foreground="black")
+        title_lbl=Label(self.root,text="Recognition",font=("times new roman",45),bg="white",foreground="black")
         title_lbl.place(x=300,y=20,width=1230,height=45)
 
 
 
- #background image 
 
-        img_left=Image.open("images/reco.jpeg")
-        img_left=img_left.resize((700,680))
-        self.photoimg_left=ImageTk.PhotoImage(img_left)
+         #background image 
 
-        bg_img=Label(self.root,image=self.photoimg_left)
-        bg_img.place(x=0,y=120,width=700,height=680)
+        img4=Image.open("images/back.jpeg")
+        img4=img4.resize((1530,710))
+        self.photoimg4=ImageTk.PhotoImage(img4)
 
-        img_right=Image.open("images/reco2.jpg")
-        img_right=img_right.resize((750,680))
-        self.photoimg_right=ImageTk.PhotoImage(img_right)
-
-        bg_img=Label(self.root,image=self.photoimg_right)
-        bg_img.place(x=700,y=120,width=750,height=680)
-
-#button
-        b1_1=Button(self.root,text="Start Recognisation",cursor="hand2",font=("times new roman",45),foreground="black",background="white")
-        b1_1.place(x=350,y=600,width=550,height=40)
+        bg_img=Label(self.root,image=self.photoimg4)
+        bg_img.place(x=0,y=150,width=1530,height=710)
 
 
-        #Attendance==================
-    def mark_attendance(self,i,r,n,d):
-        with open("parth.csv","r+",newline="\n") as f:
-            myDataList=f.readlines()
-            name_list=[]
-            for line in myDataList:
-                entry=line.split((","))
-                name_list.append(entry[0])
-            if ((i not in name_list)and (r not in name_list) and (n not in name_list) and(d not in name_list)):
-                now=datetime.now()
-                d1=now.strftime("%d/%m/%Y")
-                dtString=now.strftime("%H:%M:%S")
-                f.writelines(f"/n{i},{r},{n},{d},{dtString},{d1}Present")
-
-
-
-# face reco=================================
-
+          #Reco button
+        
+        #button declaration
+        b1_1=Button(self.root,text="Start Recognition",command=self.face_recog,cursor="hand2",font=("times new roman",45),bg="blue",foreground="black")
+        b1_1.place(x=500,y=180,width=530,height=230)
+    
+    
     def face_recog(self):
-        def draw_boundray(img,classifier,scaleFactor,minNeighbours,color,text,clf):
-            gray_image=cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
-            features=classifier.detectMultiScale(gray_image,scaleFactor,minNeighbours)
+        face_cascade_path = "/Users/parthpankajsingh/Desktop/facereco/haarcascade_frontalface_default.xml"
+        face_cap = cv2.CascadeClassifier(face_cascade_path)
 
-
-            coord=[]
-
-            for (x,y,w,h) in features:
-                cv2.rectangle(img,(x,y),(x+w,y+h),(0,255,0),3)
-                id,predict=clf.predict(gray_image[y:y+h,x:x+w])
-                confidence=int((100*(1-predict/300)))
-
-
-                conn=mysql.connector.connect(host="localhost",username="root",password="@Parth427",database="codewithparth")
-                my_cursor=conn.cursor()
-                
-                my_cursor.execute("select name from student where Student_id="+str(id))
-                n=my_cursor.fetchone()
-                n="+".join(n)
-
-                my_cursor.execute("select roll_no from student where Student_id="+str(id))
-                r=my_cursor.fetchone()
-                r="+".join(r)
-
-                my_cursor.execute("select Department from student where Student_id="+str(id))
-                d=my_cursor.fetchone()
-                d="+".join(d)
-
-                my_cursor.execute("select Student_id= from student where Student_id="+str(id))
-                i=my_cursor.fetchone()
-                i="+".join(i)
-
-                if confidence>77:
-                    cv2.putText(img,f"Id:{i}",(x,y-75),cv2.FONT_HERSHEY_COMPLEX,0.8,(255,255,255),3)
-                    cv2.putText(img,f"Roll:{r}",(x,y-55),cv2.FONT_HERSHEY_COMPLEX,0.8,(255,255,255),3)
-                    cv2.putText(img,f"Name:{n}",(x,y-30),cv2.FONT_HERSHEY_COMPLEX,0.8,(255,255,255),3)
-                    cv2.putText(img,f"Department:{d}",(x,y-5),cv2.FONT_HERSHEY_COMPLEX,0.8,(255,255,255),3)
-                    self.mark_attendance(i,r,n,d)
-
-                else:
-                     cv2.rectangle(img,(x,y),(x+w,y+h),(0,0,255),3)
-                     cv2.putText(img,"Unknown face",(x,y-55),cv2.FONT_HERSHEY_COMPLEX,0.8,(255,255,255),3)
-
-                coord=[x,y,w,h]
-
-            return coord
-        
-
-        def recognize(img,clf,faceCascade):
-            coord=draw_boundray(img,faceCascade,1.1,10,(255,255,255),"Face",clf)
-            return img
-        
-        faceCascade=cv2.CascadeClassifier("haarcascade_frontalface_default.xml")
-        clf=cv2.face.LBPHFaceRecognizer_create()
-        clf.read("classifier.xml")
-
-        video_cap=cv2.VideoCapture(0)
+    # Open the video capture device (0 represents the default camera)
+        video_cap = cv2.VideoCapture(0)
+        start_time=time.time()
 
         while True:
-            ret,img=video_cap.read()
-            img=recognize(img,clf,faceCascade)
-            cv2.imshow("Welcome to face Recognisation",img)
-
-            if cv2.waitKey(1)==13:
+            ret, video_data = video_cap.read()
+            if ret:
+                current_time = time.time()
+                elapsed_time = current_time - start_time
+            
+            # Check if 10 seconds have passed
+            if elapsed_time >= 3:
+                messagebox.showinfo("configuration error","##code contains doping of multiple radiation//<nighte mode incompatible>* ir ray detection incompatible ///#eSSL MB20 machine required ")
+                # Call the function to show additional info
+                start_time = time.time()  # Reset
+            
+# Check if the frame is successfully captured
+            if not ret:
+                print("Error: Unable to capture frame.")
                 break
 
-            
+            # Convert the frame to grayscale for face detection
+            col = cv2.cvtColor(video_data, cv2.COLOR_BGR2GRAY)
+
+            # Detect faces
+            faces = face_cap.detectMultiScale(
+                col,
+                scaleFactor=1.1,
+                minNeighbors=5,
+                minSize=(30, 30),
+                flags=cv2.CASCADE_SCALE_IMAGE
+            )
+
+            # Draw rectangles around the detected faces
+            for (x, y, w, h) in faces:
+                cv2.rectangle(video_data, (x, y), (x+w, y+h), (0, 255, 0), 2)
+
+            # Display the resulting frame
+            cv2.imshow("video_live", video_data)
+
+            # Break the loop if 'Enter' key is pressed
+            if cv2.waitKey(1) == 13:
+                break
+
+        # Release the video capture object
         video_cap.release()
+
+        # Close all windows
         cv2.destroyAllWindows()
 
-
-
-
-if __name__=="__main__":
-    root=Tk()
-    obj=Face_Recognition(root)
-    root.mainloop()
+if __name__ == "__main__":
+    root = Tk()  # Create a Tkinter root window
+    recognizer = reco(root)  # Pass the root window to the reco class
+    recognizer.face_recog()
+    root.mainloop()  # Start the Tkinter main event loop
